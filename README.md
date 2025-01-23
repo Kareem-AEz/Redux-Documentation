@@ -28,7 +28,7 @@ Please check the official documentation for any updates or changes in newer vers
 5. [The Old Way (Plain Redux)](#5-the-old-way-plain-redux)
    - [Setting Up the Reducer](#setting-up-the-reducer)
    - [Creating Actions](#creating-actions)
-6. [Selectors](#6-selectors)
+6. [Selectors](#6-Selectors-and-useSelector)
 7. [DOs and DON'Ts](#8-dos-and-donts)
 8. [Performance Considerations](#9-performance-considerations)
 9. [Common Questions](#10-common-questions)
@@ -359,7 +359,7 @@ function AccountInfo() {
 
 ---
 
-## **8. DOs and DON'Ts**
+## **7. DOs and DON'Ts**
 
 ### **DOs:**
 
@@ -376,7 +376,7 @@ function AccountInfo() {
 
 ---
 
-## **9. Performance Considerations**
+## **8. Performance Considerations**
 
 Optimizing Redux performance is crucial for maintaining a responsive application. Here are some key considerations:
 
