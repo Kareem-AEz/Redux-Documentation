@@ -1,6 +1,10 @@
 # **Redux & Redux Toolkit Reference Guide**
 
-This guide provides an overview of setting up Redux and Redux Toolkit, including the modern approach with Redux Toolkit and the traditional way of implementing actions, reducers, and thunks. It also includes best practices, and common questions.
+This guide provides an overview of setting up Redux and Redux Toolkit, including the modern approach with Redux Toolkit and the traditional way of implementing actions, reducers, and thunks. It also covers best practices, performance optimization, and common questions.
+
+## Why Use Redux Toolkit?
+
+Redux Toolkit simplifies the process of writing Redux logic. It addresses common concerns such as complex store configuration, excessive boilerplate code, and the need for multiple packages to get Redux working effectively.
 
 ## Version Information
 
@@ -28,11 +32,9 @@ Please check the official documentation for any updates or changes in newer vers
 5. [The Old Way (Plain Redux)](#5-the-old-way-plain-redux)
    - [Setting Up the Reducer](#setting-up-the-reducer)
    - [Creating Actions](#creating-actions)
-6. [Selectors](#6-Selectors-and-useSelector)
-7. [DOs and DON'Ts](#8-dos-and-donts)
-8. [Performance Considerations](#9-performance-considerations)
-9. [Common Questions](#10-common-questions)
-
+6. [Selectors and `useSelector`](#6-selectors-and-useselector)
+7. [DOs and DON'Ts](#7-dos-and-donts)
+8. [Performance Considerations](#8-performance-considerations)
 ---
 
 ## **1. Setting Up Redux Toolkit**
@@ -53,15 +55,15 @@ import accountReducer from "./features/accounts/AccountSlice";
 import customerReducer from "./features/customers/CustomerSlice";
 
 const store = configureStore({
-	reducer: {
-		account: accountReducer,
-		customer: customerReducer,
-	},
-	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({
-			thunk: true, // Thunk middleware is enabled by default
-		}),
-	devTools: process.env.NODE_ENV === "development", // Enable DevTools in development
+  reducer: {
+    account: accountReducer,
+    customer: customerReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: true, // Thunk middleware is enabled by default
+    }),
+  devTools: process.env.NODE_ENV === "development", // Enable DevTools in development
 });
 
 export default store;
@@ -121,48 +123,48 @@ Redux Toolkit introduces `createSlice` to simplify reducer and action creation. 
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-	balance: 0,
-	loan: 0,
-	loanPurpose: "",
-	isLoading: false,
+  balance: 0,
+  loan: 0,
+  loanPurpose: "",
+  isLoading: false,
 };
 
 const accountSlice = createSlice({
-	name: "account",
-	initialState,
-	reducers: {
-		deposit(state, action) {
-			state.balance += action.payload;
-			state.isLoading = false;
-		},
-		withdraw(state, action) {
-			state.balance -= action.payload;
-		},
-		requestLoan: {
-			prepare(loanAmount, loanPurpose) {
-				return {
-					payload: {
-						loanAmount,
-						loanPurpose,
-					},
-				};
-			},
-			reducer(state, action) {
-				if (state.loan > 0) return;
-				state.loan = action.payload.loanAmount;
-				state.loanPurpose = action.payload.loanPurpose;
-				state.balance += action.payload.loanAmount;
-			},
-		},
-		payLoan(state) {
-			state.balance -= state.loan;
-			state.loanPurpose = "";
-			state.loan = 0;
-		},
-		convertingCurrency(state) {
-			state.isLoading = true;
-		},
-	},
+  name: "account",
+  initialState,
+  reducers: {
+    deposit(state, action) {
+      state.balance += action.payload;
+      state.isLoading = false;
+    },
+    withdraw(state, action) {
+      state.balance -= action.payload;
+    },
+    requestLoan: {
+      prepare(loanAmount, loanPurpose) {
+        return {
+          payload: {
+            loanAmount,
+            loanPurpose,
+          },
+        };
+      },
+      reducer(state, action) {
+        if (state.loan > 0) return;
+        state.loan = action.payload.loanAmount;
+        state.loanPurpose = action.payload.loanPurpose;
+        state.balance += action.payload.loanAmount;
+      },
+    },
+    payLoan(state) {
+      state.balance -= state.loan;
+      state.loanPurpose = "";
+      state.loan = 0;
+    },
+    convertingCurrency(state) {
+      state.isLoading = true;
+    },
+  },
 });
 
 export const { withdraw, requestLoan, payLoan } = accountSlice.actions;
@@ -186,29 +188,29 @@ export default accountSlice.reducer;
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
-	const response = await fetch("/api/user");
-	const data = await response.json();
-	return data;
+  const response = await fetch("/api/user");
+  const data = await response.json();
+  return data;
 });
 
 const userSlice = createSlice({
-	name: "user",
-	initialState: { data: null, status: "idle", error: null },
-	reducers: {},
-	extraReducers: (builder) => {
-		builder
-			.addCase(fetchUser.pending, (state) => {
-				state.status = "loading";
-			})
-			.addCase(fetchUser.fulfilled, (state, action) => {
-				state.status = "succeeded";
-				state.data = action.payload;
-			})
-			.addCase(fetchUser.rejected, (state, action) => {
-				state.status = "failed";
-				state.error = action.error.message;
-			});
-	},
+  name: "user",
+  initialState: { data: null, status: "idle", error: null },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUser.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      });
+  },
 });
 
 export default userSlice.reducer;
@@ -220,19 +222,19 @@ You can still write thunks manually if needed.
 
 ```javascript
 export const deposit = (amount, currency) => {
-	if (currency === "USD") return { type: "account/deposit", payload: amount };
+  if (currency === "USD") return { type: "account/deposit", payload: amount };
 
-	return async function (dispatch) {
-		dispatch({ type: "account/convertingCurrency" });
+  return async function (dispatch) {
+    dispatch({ type: "account/convertingCurrency" });
 
-		const res = await fetch(
-			`https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`
-		);
-		const data = await res.json();
-		const convertedAmount = amount * data.rates.USD;
+    const res = await fetch(
+      `https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`
+    );
+    const data = await res.json();
+    const convertedAmount = amount * data.rates.USD;
 
-		dispatch({ type: "account/deposit", payload: convertedAmount });
-	};
+    dispatch({ type: "account/deposit", payload: convertedAmount });
+  };
 };
 ```
 
@@ -244,50 +246,50 @@ export const deposit = (amount, currency) => {
 
 ```javascript
 const initialStateAccount = {
-	balance: 0,
-	loan: 0,
-	loanPurpose: "",
-	isLoading: false,
+  balance: 0,
+  loan: 0,
+  loanPurpose: "",
+  isLoading: false,
 };
 
 export default function accountReducer(state = initialStateAccount, action) {
-	switch (action.type) {
-		case "account/convertingCurrency":
-			return { ...state, isLoading: true };
+  switch (action.type) {
+    case "account/convertingCurrency":
+      return { ...state, isLoading: true };
 
-		case "account/deposit":
-			return {
-				...state,
-				balance: state.balance + action.payload,
-				isLoading: false,
-			};
+    case "account/deposit":
+      return {
+        ...state,
+        balance: state.balance + action.payload,
+        isLoading: false,
+      };
 
-		case "account/withdraw":
-			return {
-				...state,
-				balance: state.balance - action.payload,
-			};
+    case "account/withdraw":
+      return {
+        ...state,
+        balance: state.balance - action.payload,
+      };
 
-		case "account/requestLoan":
-			if (state.loan > 0) return state;
-			return {
-				...state,
-				loan: action.payload.amount,
-				loanPurpose: action.payload.loanPurpose,
-				balance: state.balance + action.payload.amount,
-			};
+    case "account/requestLoan":
+      if (state.loan > 0) return state;
+      return {
+        ...state,
+        loan: action.payload.amount,
+        loanPurpose: action.payload.loanPurpose,
+        balance: state.balance + action.payload.amount,
+      };
 
-		case "account/payLoan":
-			return {
-				...state,
-				loan: 0,
-				loanPurpose: "",
-				balance: state.balance - state.loan,
-			};
+    case "account/payLoan":
+      return {
+        ...state,
+        loan: 0,
+        loanPurpose: "",
+        balance: state.balance - state.loan,
+      };
 
-		default:
-			return state;
-	}
+    default:
+      return state;
+  }
 }
 ```
 
@@ -295,40 +297,40 @@ export default function accountReducer(state = initialStateAccount, action) {
 
 ```javascript
 export function deposit(amount, currency) {
-	if (currency === "USD") return { type: "account/deposit", payload: amount };
+  if (currency === "USD") return { type: "account/deposit", payload: amount };
 
-	return async function (dispatch) {
-		dispatch({ type: "account/convertingCurrency" });
+  return async function (dispatch) {
+    dispatch({ type: "account/convertingCurrency" });
 
-		const res = await fetch(
-			`https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`
-		);
-		const data = await res.json();
-		const convertedAmount = amount * data.rates.USD;
+    const res = await fetch(
+      `https://api.frankfurter.dev/v1/latest?base=${currency}&symbols=USD`
+    );
+    const data = await res.json();
+    const convertedAmount = amount * data.rates.USD;
 
-		dispatch({ type: "account/deposit", payload: convertedAmount });
-	};
+    dispatch({ type: "account/deposit", payload: convertedAmount });
+  };
 }
 
 export function withdraw(amount) {
-	return { type: "account/withdraw", payload: amount };
+  return { type: "account/withdraw", payload: amount };
 }
 
 export function requestLoan(amount, loanPurpose) {
-	return {
-		type: "account/requestLoan",
-		payload: { amount: amount, loanPurpose: loanPurpose },
-	};
+  return {
+    type: "account/requestLoan",
+    payload: { amount: amount, loanPurpose: loanPurpose },
+  };
 }
 
 export function payLoan() {
-	return { type: "account/payLoan" };
+  return { type: "account/payLoan" };
 }
 ```
 
 ---
 
-## **6. Selectors and useSelector**
+## **6. Selectors and `useSelector`**
 
 Selectors are used to access state efficiently. The `useSelector` hook from React-Redux allows components to extract data from the Redux store.
 
@@ -338,22 +340,22 @@ import { useSelector } from "react-redux";
 // Selector functions
 export const getAccountBalance = (state) => state.account.balance;
 export const getLoanDetails = (state) => ({
-	loan: state.account.loan,
-	loanPurpose: state.account.loanPurpose,
+  loan: state.account.loan,
+  loanPurpose: state.account.loanPurpose,
 });
 
 // Using selectors in a component
 function AccountInfo() {
-	const balance = useSelector(getAccountBalance);
-	const { loan, loanPurpose } = useSelector(getLoanDetails);
+  const balance = useSelector(getAccountBalance);
+  const { loan, loanPurpose } = useSelector(getLoanDetails);
 
-	return (
-		<div>
-			<p>Balance: ${balance}</p>
-			<p>Loan: ${loan}</p>
-			<p>Loan Purpose: {loanPurpose}</p>
-		</div>
-	);
+  return (
+    <div>
+      <p>Balance: ${balance}</p>
+      <p>Loan: ${loan}</p>
+      <p>Loan Purpose: {loanPurpose}</p>
+    </div>
+  );
 }
 ```
 
@@ -384,7 +386,7 @@ Optimizing Redux performance is crucial for maintaining a responsive application
 
 ---
 
-<div>
+<div align='center'>
 
 ### Created with ❤️ by [Kareem](https://github.com/Kareem-AEz)
 
